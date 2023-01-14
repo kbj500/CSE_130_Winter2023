@@ -12,10 +12,8 @@ $(BINARY): $(OBJECTS)
 	$(CC) -o $@ $^
 
 $(OBJECTS): $(CFILES)
-	$(CC) $(CFLAGS) -c -o $@ $^
-
-$(CFILES):
 	clang-format -i -style=file $(CFILES)
+	$(CC) $(CFLAGS) -c -o $@ $^
 
 clean:
 	rm -rf $(BINARY) $(OBJECTS)
