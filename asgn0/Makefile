@@ -1,5 +1,5 @@
 CC=clang
-CFLAGS=-Wall -Wextra -g
+CFLAGS=-Wall -Wextra -Werror -pedantic
 
 CFILES=hello.c
 OBJECTS=hello.o
