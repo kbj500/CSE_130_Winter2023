@@ -17,10 +17,10 @@ int main() {
     char *c = malloc(sizeof(char));
     *c = 'c';
     read(0, buff, 4);
-    printf("\nbuff: %s\n", buff);
+    //printf("\nbuff: %s\n", buff);
 
     if (strcmp(buff, "get ") == 0) {
-        write(1, buff, 4);
+        //write(1, buff, 4);
         while (c[0] != '\n') {
             *c = '\0';
 
@@ -37,17 +37,20 @@ int main() {
 
             //printf("while:  %c", c[0]);
         }
-        printf("buff1: %s", buff1);
+        //printf("buff1: %s", buff1);
 
-        unsigned int i;
-        for (i = 0; i < strlen(buff1); i++)
-            printf("\nb:'%c'\n", buff1[i]);
+        //unsigned int i;
+        //for (i = 0; i < strlen(buff1); i++)
+        // printf("\nb:'%c'\n", buff1[i]);
 
         int o = open(buff1, O_RDONLY);
 
-        printf("o: %d", o);
+        //printf("o: %d", o);
         if (o < 0) {
-            write(1, "Invalid command", sizeof("Invalid command"));
+            free(buff1);
+            free(buff2);
+            free(c);
+            fprintf(stderr, "Invalid Command\n");
             return 1;
         }
         int fr = 0;
@@ -56,7 +59,7 @@ int main() {
         while (fr == 0) {
             *c = '\0';
             rd = read(o, c, 1);
-            printf("\nC: %s\n", c);
+            //printf("\nC: %s\n", c);
 
             //buff2 = realloc(buff2, counter+1);
             strncat(buff2, c, 1);
@@ -64,16 +67,19 @@ int main() {
                 fr = 1;
             }
             counter++;
-            printf("\nCounter: %d\n", counter);
+            //printf("\nCounter: %d\n", counter);
 
-            printf("\nBuff2:  %lu\n", strlen(buff2));
+            //printf("\nBuff2:  %lu\n", strlen(buff2));
             buff2 = realloc(buff2, counter + counter * sizeof(char));
-            printf("\nbuff2: %s\n", buff2);
+            //printf("\nbuff2: %s\n", buff2);
         }
         printf("\n%s\n", buff2);
+        free(buff1);
+        free(buff2);
+        free(c);
         return 0;
     } else if (strcmp(buff, "set ") == 0) {
-        write(1, buff, 4);
+        //write(1, buff, 4);
 
         while (c[0] != '\n') {
             *c = '\0';
@@ -91,10 +97,10 @@ int main() {
 
             //printf("while:  %c", c[0]);
         }
-        printf("buff1: %s", buff1);
+        //printf("buff1: %s", buff1);
         int o = open(buff1, O_CREAT | O_WRONLY | O_TRUNC, 0666);
 
-        printf("o: %d", o);
+        //printf("o: %d", o);
 
         *c = '\0';
         int counter = 0;
@@ -116,10 +122,22 @@ int main() {
             //printf("while:  %c", c[0]);
         }
 
-        printf("buff2: %s", buff2);
+        //printf("buff2: %s", buff2);
+
         write(o, buff2, strlen(buff2));
 
+        free(buff1);
+        free(buff2);
+        free(c);
+
+        printf("OK");
+
     } else {
-        write(1, "Invalid command", sizeof("Invalid command"));
+
+        free(buff1);
+        free(buff2);
+        free(c);
+        fprintf(stderr, "Invalid Command\n");
+        return 1;
     }
 }
