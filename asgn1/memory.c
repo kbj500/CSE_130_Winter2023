@@ -59,7 +59,7 @@ int main() {
         while (fr == 0) {
             *c = '\0';
             rd = read(o, c, 1);
-            //printf("\nC: %s\n", c);
+            ////printf("\nC: %s\n", c);
 
             //buff2 = realloc(buff2, counter+1);
             strncat(buff2, c, 1);
@@ -73,7 +73,7 @@ int main() {
             buff2 = realloc(buff2, counter + counter * sizeof(char));
             //printf("\nbuff2: %s\n", buff2);
         }
-        printf("\n%s\n", buff2);
+        fprintf(stdout, "%s", buff2);
         free(buff1);
         free(buff2);
         free(c);
@@ -88,7 +88,7 @@ int main() {
             read(0, c, 1);
             if (c[0] == '\n')
                 break;
-            //printf("\nC: %s", c);
+            // printf("\nC: %s", c);
             strncat(buff1, c, 1);
             s++;
             buff1 = realloc(buff1, s * sizeof(char));
@@ -108,7 +108,7 @@ int main() {
         while (c[0] != '\n') {
             *c = '\0';
 
-            //printf("\nC: %s", c);
+            // printf("\nC: %s", c);
             read(0, c, 1);
             if (c[0] == '\n')
                 break;
@@ -131,6 +131,8 @@ int main() {
         free(c);
 
         printf("OK");
+
+        return 0;
 
     } else {
 
