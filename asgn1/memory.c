@@ -7,10 +7,13 @@
 #include <stdio.h>
 #include <fcntl.h>
 
+#define buffS 4096
+
 int main() {
 
     char buff[4];
     int s = 1;
+    //int re;
     char *buff1 = malloc(sizeof(char) * s);
 
     char *buff2 = malloc(sizeof(char));
@@ -19,19 +22,27 @@ int main() {
     read(0, buff, 4);
     //printf("\nbuff: %s\n", buff);
 
-    if (strcmp(buff, "get ") == 0) {
+    if (strcmp(buff, "get ") == 0) { // if command is get
         //write(1, buff, 4);
-        while (c[0] != '\n') {
+        //
+        while (c[0] != '\n') { // read filename
             *c = '\0';
 
             //printf("\nC: %s", c);
             read(0, c, 1);
-            if (c[0] == '\n')
+            if (c[0] == '\n') // end of file name
                 break;
-            //printf("\nC: %s", c);
-            strncat(buff1, c, 1);
+            if (c[0] == '\0') { // ended file anme without \n
+                free(buff1);
+                free(buff2);
+                free(c);
+                fprintf(stderr, "Invalid Command\n");
+                return 1;
+            }
+            // printf("\nC: %s", c);
+            strncat(buff1, c, 1); //load everything in buffer
             s++;
-            buff1 = realloc(buff1, s * sizeof(char));
+            buff1 = realloc(buff1, s * sizeof(char)); // change buff size per
 
             //printf("buff1: %s", buff1);
 
@@ -46,7 +57,7 @@ int main() {
         int o = open(buff1, O_RDONLY);
 
         //printf("o: %d", o);
-        if (o < 0) {
+        if (o < 0) { //if file does not exist
             free(buff1);
             free(buff2);
             free(c);
@@ -56,15 +67,16 @@ int main() {
         int fr = 0;
         int rd;
         int counter = 0;
-        while (fr == 0) {
+        while (fr == 0) { //loop thru file reading char by char
             *c = '\0';
             rd = read(o, c, 1);
-            ////printf("\nC: %s\n", c);
+            //printf("\nrd: %d\n", rd);
 
             //buff2 = realloc(buff2, counter+1);
             strncat(buff2, c, 1);
-            if (rd == 0) {
+            if (rd == 0) { //if nothing is read done with code
                 fr = 1;
+                break;
             }
             counter++;
             //printf("\nCounter: %d\n", counter);
@@ -88,6 +100,13 @@ int main() {
             read(0, c, 1);
             if (c[0] == '\n')
                 break;
+            if (c[0] == '\0') {
+                free(buff1);
+                free(buff2);
+                free(c);
+                fprintf(stderr, "Invalid Command\n");
+                return 1;
+            }
             // printf("\nC: %s", c);
             strncat(buff1, c, 1);
             s++;
@@ -102,15 +121,15 @@ int main() {
 
         //printf("o: %d", o);
 
-        *c = '\0';
+        *c = 'c';
         int counter = 0;
 
-        while (c[0] != '\n') {
+        while (c[0] != '\0') {
             *c = '\0';
 
             // printf("\nC: %s", c);
             read(0, c, 1);
-            if (c[0] == '\n')
+            if (c[0] == '\0')
                 break;
             //printf("\nC: %s", c);
             strncat(buff2, c, 1);
