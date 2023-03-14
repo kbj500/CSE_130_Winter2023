@@ -18,7 +18,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <pthread.h>
-
+#include <sys/file.h>
 #include <sys/stat.h>
 
 #define CON_SIZE 30
@@ -29,7 +29,7 @@ void handle_get(conn_t *);
 void handle_put(conn_t *);
 void handle_unsupported(conn_t *);
 void *worker_handle(void*arg);
-void *listener_handle(void*arg);
+//void *listener_handle(void*arg);
 queue_t *conq = NULL;
 size_t port;
 
@@ -92,6 +92,7 @@ int main(int argc, char **argv) {
     conq = queue_new(CON_SIZE);
 
 
+//    pthread_t tlis = pthread_create(&tlis, NULL, listener_handle, NULL);
 
     pthread_t tpool[nthread];
 
@@ -99,22 +100,21 @@ int main(int argc, char **argv) {
 	    pthread_create(&tpool[i], NULL, worker_handle , NULL);
     }
 
-    //signal(SIGPIPE, SIG_IGN);
-    //Listener_Socket sock;
-    //listener_init(&sock, port);
+    signal(SIGPIPE, SIG_IGN);
+    Listener_Socket sock;
+    listener_init(&sock, port);
 
-    pthread_t tlis = pthread_create(&tlis, NULL, listener_handle, NULL);
     
-    /*while (1) {
-        int connfd = listener_accept(&sock);
-        handle_connection(connfd);
-        close(connfd);
-    }*/
+    while (1) {
+        uintptr_t connfd = listener_accept(&sock);
+	queue_push(conq,(void*)connfd);
+//        close(connfd);
+    }
 
     return EXIT_SUCCESS;
 }
 
-
+/*
 //this function is only for dispatch to listen and add connections to queue
 void * listener_handle(){
 
@@ -123,20 +123,20 @@ void * listener_handle(){
     	listener_init(&sock, port);
 	while(1){
 		uintptr_t connfd = listener_accept(&sock);
-		while(queue_push(conq,(void*) connfd)){
-				}
+		queue_push(conq,(void*) connfd);
 	}
-}
+}*/
+
 
 //this function is only for workers to handle connections on the queue
 void * worker_handle(){
 
 	while(1){
-		uintptr_t popcon = 0;
-		while(queue_pop(conq,(void**) popcon)){
+		uintptr_t popcon;
+		queue_pop(conq,(void**) &popcon);
 				handle_connection(popcon);
 				close(popcon);
-				}
+				
 	}
 }
 
@@ -156,7 +156,7 @@ void handle_connection(int connfd) {
         debug("%s", conn_str(conn));
         const Request_t *req = conn_get_request(conn);
         if (req == &REQUEST_GET) {
-            handle_get(conn);
+		handle_get(conn);
         } else if (req == &REQUEST_PUT) {
             handle_put(conn);
         } else {
@@ -184,6 +184,7 @@ void handle_get(conn_t *conn) {
     uint64_t fsize = 0; 
     int fd = open(uri, O_RDONLY, 0600);
 
+
     if(fd < 0){
 //	debug("%s: %d", uri, errno);
         if (errno == EACCES || errno == EISDIR) {
@@ -199,6 +200,7 @@ void handle_get(conn_t *conn) {
     }
 
 
+    flock(fd, LOCK_SH);
 
     // 2. Get the size of the file.
     // (hint: checkout the function fstat)!
@@ -231,12 +233,24 @@ void handle_get(conn_t *conn) {
      if (res == NULL) {
         res = &RESPONSE_OK;
      }
-     
+     fprintf(stderr,"%s,%s,%d,%s\n",request_get_str(conn_get_request(conn)),
+                                conn_get_uri(conn),
+                                response_get_code(res),conn_get_header(conn, "Request-Id"));
+     flock(fd, LOCK_UN);
      close(fd);
 
 
+     
+
+     return;
+
 out:
-    conn_send_response(conn, res); 
+
+    fprintf(stderr,"%s,%s,%d,%s\n",request_get_str(conn_get_request(conn)),
+                                conn_get_uri(conn),
+                                response_get_code(res),conn_get_header(conn, "Request-Id"));
+
+    conn_send_response(conn, res);
 
 }
 
@@ -244,6 +258,9 @@ void handle_unsupported(conn_t *conn) {
     debug("handling unsupported request");
 
     // send responses
+    fprintf(stderr,"%s,%s,%d,%s\n",request_get_str(conn_get_request(conn)),
+                                conn_get_uri(conn),
+                                501,conn_get_header(conn, "Request-Id"));
     conn_send_response(conn, &RESPONSE_NOT_IMPLEMENTED);
 }
 
@@ -270,6 +287,7 @@ void handle_put(conn_t *conn) {
         }
     }
 
+    flock(fd, LOCK_EX);
     res = conn_recv_file(conn, fd);
 
     if (res == NULL && existed) {
@@ -278,9 +296,16 @@ void handle_put(conn_t *conn) {
         res = &RESPONSE_CREATED;
     }
 
+    flock(fd,LOCK_UN);
+
     close(fd);
 
 out:
+
+    fprintf(stderr,"%s,%s,%d,%s\n",request_get_str(conn_get_request(conn)),
+                                conn_get_uri(conn),
+                                response_get_code(res),conn_get_header(conn, "Request-Id"));
+
     conn_send_response(conn, res);
 }
 
