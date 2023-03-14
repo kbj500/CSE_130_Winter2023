@@ -114,6 +114,8 @@ int main(int argc, char **argv) {
     return EXIT_SUCCESS;
 }
 
+
+//this function is only for dispatch to listen and add connections to queue
 void * listener_handle(){
 
 	signal(SIGPIPE, SIG_IGN);
@@ -126,6 +128,7 @@ void * listener_handle(){
 	}
 }
 
+//this function is only for workers to handle connections on the queue
 void * worker_handle(){
 
 	while(1){
