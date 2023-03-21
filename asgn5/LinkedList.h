@@ -1,7 +1,6 @@
 #ifndef LINKEDLIST_H
 #define LINKEDLIST_H
 
-
 /**
  * @file
  * This file provided a doubly-linked list implementation for storing strings (NULL-terminated
@@ -19,11 +18,11 @@
  * as they're already chained together. 
  */
 typedef struct ListItem {
-	struct ListItem *previousItem;
-	struct ListItem *nextItem;
-	char *data;
-	int ref;
-	int clockHand;
+    struct ListItem *previousItem;
+    struct ListItem *nextItem;
+    char *data;
+    int ref;
+    int clockHand;
 } ListItem;
 
 /**
@@ -49,7 +48,6 @@ ListItem *LinkedListNew(char *data);
  * @return A pointer to the newly-malloc()'d ListItem.
  */
 ListItem *LinkedListCreateAfter(ListItem *item, char *data);
-
 
 /**
  * This function will remove a list item from the linked list and free() the memory that the
@@ -91,7 +89,6 @@ ListItem *LinkedListGetFirst(ListItem *list);
  */
 ListItem *LinkedListGetLast(ListItem *list);
 
-
 /**
  * LinkedListSwapData() switches the data pointers of the two provided ListItems. This is most
  * useful when trying to reorder ListItems but when you want to preserve their location. This
@@ -115,15 +112,13 @@ int LinkedListSwapData(ListItem *firstItem, ListItem *secondItem);
  * @return SUCCESS or STANDARD_ERROR if passed NULL pointers.
  */
 int LinkedListPrint(ListItem *list);
-ListItem *isItemInLinkedList(ListItem *head, char* elem);
-void changeData(ListItem *item, char* elem);
+ListItem *isItemInLinkedList(ListItem *head, char *elem);
+void changeData(ListItem *item, char *elem);
 
 void changeRef(ListItem *item, int i);
 ListItem *isListFull(ListItem *head);
-void clockHandMiss(ListItem *head, char* elem);
-
+void clockHandMiss(ListItem *head, char *elem);
 
 void setClockHead(ListItem *head);
 
 #endif
-

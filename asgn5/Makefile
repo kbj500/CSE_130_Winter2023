@@ -3,7 +3,7 @@ CFLAGS=-Wall -Wextra -Werror -pedantic
 
 QHEADER=queue.h
 QCFILES=queue.c
-CHEADER=LinkedList.c
+CHEADER=LinkedList.h
 CCFILES=cacher.c LinkedList.c
 
 OBJ=queue.o
